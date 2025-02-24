@@ -21,7 +21,7 @@ export async function POST(req: NextRequest){
     };
 
     const hashpassword = await bcrypt.hash(password, 10);
-    const userRole = role && ["ADMIN", "INSTRUCTOR"].includes(role) ? role : "STUDENT";
+    const userRole = role && ["ADMIN"].includes(role) ? role : "STUDENT";
 
 
     const newUser = await prisma.user.create({

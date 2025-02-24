@@ -1,3 +1,4 @@
+
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,12 +13,14 @@ export async function middleware(req:NextRequest){
     }
 
     if (pathname.startsWith("/admin")) {
-        if (!token || token.role !== "admin") {
+        console.log(token);
+        
+        if (!token || token.role !== "ADMIN") {
             return NextResponse.redirect(new URL("/", req.url))
         }
     }
 
-    if (token && pathname.startsWith("/auth/signin")) {
+    if (token && pathname.startsWith("/signin")) {
         return NextResponse.redirect(new URL("/", req.url))
     }
 

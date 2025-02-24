@@ -34,13 +34,14 @@ export default function Signup() {
     });
 
     const data = await res.json();
+    // console.log(data)
     setLoading(false);
 
     if (!res.ok) {
       setError(data.error || "Something went wrong!");
     } else {
-      alert("welcome")
-      router.push("/dashboard");
+      // alert("welcome")
+      router.push("/login");
     }
   };
 
