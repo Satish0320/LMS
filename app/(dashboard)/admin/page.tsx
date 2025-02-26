@@ -52,16 +52,14 @@ export default function CoursesList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           {courses.map((course) => (
             <div key={course.id} className="p-4 border rounded">
+              <p className="font-bold">ID: {course.id}</p>
               <h2 className="text-xl font-semibold">{course.title}</h2>
               <p>{course.description}</p>
               <p className="font-bold">Price: ₹{course.price}</p>
               <div>
-                <button
-                  // onClick={() => handleBuyCourse(course.id)}
-                  className="mt-2 p-2 bg-blue-600 text-white rounded"
-                >
-                  Edit
-                </button>
+              <Link href="/edit-courses">
+          <button className="mt-2 p-2 bg-blue-600 text-white rounded">Edit</button>
+        </Link>
               </div>
               <div>
                 <button

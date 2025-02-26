@@ -61,6 +61,9 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
     }
     console.log("Existing Course:", existingCourse);
+    await prisma.courseEnrollment.deleteMany({
+      where:{courseId: id}
+    })
 
     await prisma.course.delete({
       where: { id },
@@ -71,3 +74,50 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Something went wrong", details: e }, { status: 500 });
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    const body = await req.json();
+
+    const { id, title, description, price } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Course ID is required" }, { status: 400 });
+    }
+
+    const result = courseSchema.safeParse({ title, description, price });
+
+    if (!result.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: result.error.format() },
+        { status: 400 }
+      );
+    }
+
+    const existingCourse = await prisma.course.findUnique({
+      where: { id }, 
+    });
+
+    if (!existingCourse) {
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    }
+
+    const updatedCourse = await prisma.course.update({
+      where: { id }, 
+      data: { title, description, price: Number(price) }, 
+    });
+
+    return NextResponse.json(
+      { message: "Course updated successfully", updatedCourse },
+      { status: 200 }
+    );
+
+  } catch (e) {
+    console.error("Error updating course:", e);
+    return NextResponse.json(
+      { error: "Something went wrong", details: e },
+      { status: 500 }
+    );
+  }
+}
+
