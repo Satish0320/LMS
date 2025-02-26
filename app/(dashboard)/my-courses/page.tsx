@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useSession } from "next-auth/react";
@@ -6,15 +5,22 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function EnrolledCourses() {
-    
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (status === "loading") return; // Wait for session to load
+
+    if (!session?.user) {
+      router.push("/dashboard");
+      return;
+    }
+
     const fetchEnrolledCourses = async () => {
       try {
         const res = await fetch("/api/my-courses");
-        if (!res.ok) throw new Error("Failed to fetch enrolled courses");
         const data = await res.json();
         setCourses(data.enrolledCourses || []);
       } catch (error) {
@@ -25,22 +31,12 @@ export default function EnrolledCourses() {
     };
 
     fetchEnrolledCourses();
-  }, []);
+  }, [session, status, router]); // Run only when session or status changes
 
-   const{data: session} = useSession();
-      const route = useRouter();
-  
-  
-      if (!session?.user) {
-          route.push("/dashboard")
-          return null
-      }
-
-  if (loading) return <p>Loading enrolled courses...</p>;
+  if (status === "loading" || loading) return <p>Loading enrolled courses...</p>;
 
   return (
     <div className="p-6">
-        {session.user.name}
       <h1 className="text-2xl font-bold">My Courses</h1>
       {courses.length === 0 ? (
         <p>You are not enrolled in any courses.</p>

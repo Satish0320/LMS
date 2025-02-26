@@ -1,65 +1,85 @@
-"use client";
+"use client"
 
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-export default function AdminDashboard() {
-    const titleref = useRef<HTMLInputElement>(null);
-    const descriptionref = useRef<HTMLTextAreaElement>(null);
-    const priceref = useRef<HTMLInputElement>(null);
-  const { data: session } = useSession();
-  const router = useRouter();
 
-  if (!session?.user || session.user.role !== "ADMIN") {
-    router.push("/dashboard");
-    return null;
-  }
+export default function CoursesList() {
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddCourse = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const title = titleref.current?.value
-    const description = descriptionref.current?.value
-    const price = priceref.current?.value
-    const res = await fetch("/api/courses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, price}),
-    });
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const res = await fetch("/api/courses");
+        if (!res.ok) throw new Error("Failed to fetch courses");
+        const data = await res.json();
+        setCourses(data.allCourses || []);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (res.ok) {
-      alert("Course added successfully!");
-    } else {
-      alert("Failed to add course.");
+    fetchCourses();
+  }, []);
+
+  const deletecourse = async(id: string) =>{
+    try {
+      await fetch("/api/courses",{
+        method: "DELETE",
+        headers:{"Content-Type": "application/json"},
+        body: JSON.stringify({id})
+      });
+
+      setCourses((prevCourse)=> prevCourse.filter((course)=>course.id !== id));
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      alert("Something went wrong.");
     }
-  };
+  }
+  
+
+  if (loading) return <p>Loading courses...</p>;
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-
-      <form onSubmit={handleAddCourse} className="mt-4">
-        <input
-          type="text"
-          ref={titleref}
-          placeholder="Course Title"
-          className="border p-2 w-full"
-        />
-        <textarea
-          ref={descriptionref}
-          placeholder="Course Description"
-          className="border p-2 w-full mt-2"
-        />
-        <input
-          type="number"
-          placeholder="Price"
-          ref={priceref}
-          className="border p-2 w-full mt-2"
-        />
-        <button className="mt-2 p-2 bg-blue-600 text-white rounded" type="submit">
-          Add Course
-        </button>
-      </form>
+      <h1 className="text-2xl font-bold">Available Courses</h1>
+      {courses.length === 0 ? (
+        <p>No courses available.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+          {courses.map((course) => (
+            <div key={course.id} className="p-4 border rounded">
+              <h2 className="text-xl font-semibold">{course.title}</h2>
+              <p>{course.description}</p>
+              <p className="font-bold">Price: ₹{course.price}</p>
+              <div>
+                <button
+                  // onClick={() => handleBuyCourse(course.id)}
+                  className="mt-2 p-2 bg-blue-600 text-white rounded"
+                >
+                  Edit
+                </button>
+              </div>
+              <div>
+                <button
+                  onClick={() => deletecourse(course.id)}
+                  className="mt-2 p-2 bg-red-600 text-white rounded"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div>
+        <Link href="/admin-courses">
+          <button className="mt-2 p-2 bg-green-600 text-white rounded">Add Course</button>
+        </Link>
+      </div>
     </div>
   );
 }

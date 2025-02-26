@@ -9,11 +9,11 @@ export async function middleware(req:NextRequest){
     const { pathname } = req.nextUrl;
 
     if ((!token && pathname.startsWith("/dashboard"))) {
-        return NextResponse.redirect(new URL("/auth/signin", req.url))
+        return NextResponse.redirect(new URL("/login", req.url))
     }
 
     if (pathname.startsWith("/admin")) {
-        console.log(token);
+        // console.log(token);
         
         if (!token || token.role !== "ADMIN") {
             return NextResponse.redirect(new URL("/", req.url))
@@ -28,5 +28,5 @@ export async function middleware(req:NextRequest){
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/admin/:path*", "/auth/signin"]
+    matcher: ["/dashboard/:path*", "/admin/:path*", "/login", "/courses", "/admin-courses", "/my-courses" ]
 }

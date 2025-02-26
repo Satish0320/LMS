@@ -13,10 +13,10 @@ export default function Dashboard(){
     if(status === "loading") return <p>Loading....</p>
 
     if (!session?.user) {
-        route.push("/auth/login")
+        route.push("/login")
         return null
     }
-  console.log(session)
+  // console.log(session)
 
 
     return (
